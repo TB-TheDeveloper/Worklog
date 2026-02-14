@@ -1,7 +1,11 @@
 import express, { type Request, type Response } from "express";
 import mysql from "mysql2";
-import { type RowDataPacket } from "mysql2/promise";
+
 import cors from "cors";
+import type { CreateWorkEntryBody, WorkEntry } from "../Types";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
@@ -10,10 +14,10 @@ app.use(express.json());
 
 // DB connection
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "password",
-  database: "worklog",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 db.connect((err) => {
@@ -23,21 +27,6 @@ db.connect((err) => {
   }
   console.log("Connected to MySQL");
 });
-
-interface WorkEntry extends RowDataPacket {
-  id: number;
-  name: string;
-  units: number;
-  job_type: string;
-  work_date: string;
-}
-
-interface CreateWorkEntryBody {
-  userId: number;
-  units: number;
-  jobType: string;
-  workDate: string;
-}
 
 // Get all work entries
 app.get("/api/work-entries", (req: Request, res: Response) => {
