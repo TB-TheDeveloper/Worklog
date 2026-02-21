@@ -7,6 +7,12 @@ export interface CreateWorkEntryBody {
   workDate: string;
 }
 
+export interface CreateUser extends RowDataPacket {
+  id: number;
+  isEditing: boolean;
+  name: string;
+}
+
 export interface WorkEntry extends RowDataPacket {
   id: number;
   name: string;

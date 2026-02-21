@@ -7,6 +7,11 @@ const MenuBar: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const linkClasses = (path: string) =>
+    `px-4 py-2 rounded-md text-white hover:bg-blue-500 transition ${
+      isActive(path) ? "bg-blue-800" : ""
+    }`;
+
   return (
     <nav className="w-full bg-blue-600 shadow-lg">
       <div className="flex items-center justify-between px-8 py-4">
@@ -15,36 +20,16 @@ const MenuBar: React.FC = () => {
 
         {/* Menu Links */}
         <div className="flex space-x-6">
-          <Link
-            to="/"
-            className={`px-4 py-2 rounded-md text-white hover:bg-blue-500 transition ${
-              isActive("/") ? "bg-blue-800" : ""
-            }`}
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/entries"
-            className={`px-4 py-2 rounded-md text-white hover:bg-blue-500 transition ${
-              isActive("/entries") ? "bg-blue-800" : ""
-            }`}
-          >
+          <Link to="/" className={linkClasses("/")}>
             Work Entries
           </Link>
-          <Link
-            to="/approvals"
-            className={`px-4 py-2 rounded-md text-white hover:bg-blue-500 transition ${
-              isActive("/approvals") ? "bg-blue-800" : ""
-            }`}
-          >
+          <Link to="/users" className={linkClasses("/users")}>
+            Users
+          </Link>
+          <Link to="/approvals" className={linkClasses("/approvals")}>
             Approvals
           </Link>
-          <Link
-            to="/settings"
-            className={`px-4 py-2 rounded-md text-white hover:bg-blue-500 transition ${
-              isActive("/settings") ? "bg-blue-800" : ""
-            }`}
-          >
+          <Link to="/settings" className={linkClasses("/settings")}>
             Settings
           </Link>
         </div>
