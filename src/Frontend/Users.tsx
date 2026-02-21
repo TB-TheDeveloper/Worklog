@@ -1,24 +1,16 @@
-import React, { useEffect, useState } from "react";
-import type { CreateUser } from "../Types";
+import React, { useContext, useEffect, useState } from "react";
+
+import { AppContext } from "./AppContextProvider";
+import useService from "./service";
 
 const Users: React.FC = () => {
   const [newName, setNewName] = useState<string>("");
-  const [entries, setEntries] = useState<CreateUser[]>([]);
-  //const [isEditing, setIsEditing] = useState<boolean>(false);
-
-  const getData = async () => {
-    try {
-      const res = await fetch("http://localhost:4000/api/users");
-      console.log(res);
-      const data = (await res.json()) as CreateUser[];
-      setEntries(data.map((d) => ({ ...d, isEditing: false })));
-    } catch (error) {
-      console.error("Failed to fetch users entries:", error);
-    }
-  };
+  const { users, setUsers } = useContext(AppContext);
+  const { getUserData } = useService();
 
   useEffect(() => {
-    getData();
+    if (users.length) return;
+    getUserData();
   }, []);
 
   const createUserEntry = async () => {
@@ -41,7 +33,7 @@ const Users: React.FC = () => {
 
       const data = await response.json();
       setNewName("");
-      getData();
+      getUserData();
       console.log(data);
     } catch (error) {
       console.error("Error creating entry:", error);
@@ -50,7 +42,7 @@ const Users: React.FC = () => {
 
   const updateUserEntry = async (id: number) => {
     try {
-      const entry = entries.find((entry) => entry.id === id);
+      const entry = users.find((entry) => entry.id === id);
       if (!entry) {
         console.error(`Entry with id ${id} not found`);
         return;
@@ -78,8 +70,8 @@ const Users: React.FC = () => {
         return;
       }
 
-      // Refresh entries from server
-      getData();
+      // Refresh users from server
+      getUserData();
       console.log("Entry updated successfully");
     } catch (error) {
       console.error("Error updating entry:", error);
@@ -87,98 +79,99 @@ const Users: React.FC = () => {
   };
 
   return (
-    <div className="p-2 mt-4 max-w-full mx-auto">
+    <div className="p-2 mt-4 max-w-full mx-auto bg-orange">
       <h1 className="text-2xl font-bold mb-4">Users</h1>
-
-      <table className="w-full border">
-        <thead className="bg-gray-400">
-          <tr>
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Id</th>
-            <th className="p-2 border">Add/Edit</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map(({ id, name, isEditing }) => (
-            <tr key={id}>
-              <td className="p-0 border">
+      <div className="max-h-[82.5vh] overflow-y-auto">
+        <table className="w-full border">
+          <thead className="bg-gray-400 sticky top-0">
+            <tr>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Id</th>
+              <th className="p-2 border">Add/Edit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border p-0">
                 <input
                   className="w-full h-full px-2 border-none outline-none"
                   type="text"
-                  value={name || ""}
+                  value={newName || ""}
                   placeholder="Please Enter Name"
-                  onChange={(e) =>
-                    setEntries((prev) => {
-                      const index = prev.findIndex((e) => e.id === id);
-                      if (index === -1) return prev;
-
-                      const newEntries = [...prev];
-                      newEntries[index] = {
-                        ...newEntries[index],
-                        name: e.target.value,
-                      };
-
-                      return newEntries;
-                    })
-                  }
-                  disabled={!isEditing}
+                  onChange={(e) => setNewName(e.target.value)}
                 />
               </td>
-              <td className="p-2 border">{id}</td>
-              <td className="p-2 text-center border ">
+              <td className="p-2 border bg-gray-300"></td>
+              <td className="p-2 border text-center">
                 <button
-                  className={`${
-                    isEditing
-                      ? "bg-green-500 hover:bg-green-400"
-                      : "bg-red-500 hover:bg-red-400"
-                  } text-white px-3 py-1 w-4/5 cursor-pointer rounded`}
-                  onClick={() => {
-                    if (isEditing) {
-                      updateUserEntry(id);
-                    }
-                    setEntries((prev) => {
-                      const index = prev.findIndex((e) => e.id === id);
-                      if (index === -1) return prev;
-
-                      const newEntries = [...prev];
-                      newEntries[index] = {
-                        ...newEntries[index],
-                        isEditing: !isEditing,
-                      };
-
-                      return newEntries;
-                    });
-                  }}
+                  className="bg-green-500 text-white px-3 py-1 w-4/5 hover:bg-green-400 cursor-pointer rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  onClick={() => createUserEntry()}
+                  disabled={!newName}
+                  title={!newName ? "Please fill required field(s)" : ""}
                 >
-                  {!isEditing ? "Edit" : "Save"}
+                  Add
                 </button>
               </td>
             </tr>
-          ))}
-          <tr>
-            <td className="border p-0">
-              <input
-                className="w-full h-full px-2 border-none outline-none"
-                type="text"
-                value={newName || ""}
-                placeholder="Please Enter Name"
-                onChange={(e) => setNewName(e.target.value)}
-              />
-            </td>
-            <td className="p-2 border bg-gray-300"></td>
-            <td className="p-2 border text-center">
-              <button
-                className="bg-green-500 text-white px-3 py-1 w-4/5 hover:bg-green-400 cursor-pointer rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
-                onClick={() => createUserEntry()}
-                disabled={!newName}
-                title={!newName ? "Please fill require fields" : ""}
-              >
-                Add
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            {users.map(({ id, name, isEditing }) => (
+              <tr key={id}>
+                <td className="p-0 border">
+                  <input
+                    className="w-full h-full px-2 border-none outline-none"
+                    type="text"
+                    value={name || ""}
+                    placeholder="Please Enter Name"
+                    onChange={(e) =>
+                      setUsers((prev) => {
+                        const index = prev.findIndex((e) => e.id === id);
+                        if (index === -1) return prev;
+
+                        const newusers = [...prev];
+                        newusers[index] = {
+                          ...newusers[index],
+                          name: e.target.value,
+                        };
+
+                        return newusers;
+                      })
+                    }
+                    disabled={!isEditing}
+                  />
+                </td>
+                <td className="p-2 border">{id}</td>
+                <td className="p-2 text-center border ">
+                  <button
+                    className={`${
+                      isEditing
+                        ? "bg-green-500 hover:bg-green-400"
+                        : "bg-blue-500 hover:bg-blue-400"
+                    } text-white px-3 py-1 w-4/5 cursor-pointer rounded`}
+                    onClick={() => {
+                      if (isEditing) {
+                        updateUserEntry(id);
+                      }
+                      setUsers((prev) => {
+                        const index = prev.findIndex((e) => e.id === id);
+                        if (index === -1) return prev;
+
+                        const newusers = [...prev];
+                        newusers[index] = {
+                          ...newusers[index],
+                          isEditing: !isEditing,
+                        };
+
+                        return newusers;
+                      });
+                    }}
+                  >
+                    {!isEditing ? "Edit" : "Save"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,14 @@
 import { type RowDataPacket } from "mysql2/promise";
 
+export interface Approvals {
+  id: number;
+  work_entry_id: number;
+  supervisor_id: number;
+  action: string;
+  comment: string;
+  action_date: Date;
+}
+
 export interface CreateWorkEntryBody {
   userId: number;
   units: number;

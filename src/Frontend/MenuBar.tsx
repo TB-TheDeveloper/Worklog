@@ -26,11 +26,11 @@ const MenuBar: React.FC = () => {
           <Link to="/users" className={linkClasses("/users")}>
             Users
           </Link>
+          <Link to="/casestoapprove" className={linkClasses("/casestoapprove")}>
+            Cases To Approve
+          </Link>
           <Link to="/approvals" className={linkClasses("/approvals")}>
             Approvals
-          </Link>
-          <Link to="/settings" className={linkClasses("/settings")}>
-            Settings
           </Link>
         </div>
       </div>
