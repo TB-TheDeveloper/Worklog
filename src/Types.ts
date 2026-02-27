@@ -14,6 +14,7 @@ export interface CreateWorkEntryBody {
   units: number;
   jobType: string;
   workDate: string;
+  action: string;
 }
 
 export interface CreateUser extends RowDataPacket {

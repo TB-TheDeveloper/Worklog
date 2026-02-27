@@ -34,6 +34,7 @@ app.get("/api/work-entries", (req: Request, res: Response) => {
     SELECT we.id, u.name, we.units, we.job_type, we.work_date
     FROM work_entries we
     JOIN users u ON we.user_id = u.id
+    WHERE we.action IS NULL
     ORDER BY we.work_date DESC
   `;
 
@@ -127,7 +128,7 @@ app.put(
       SET name = ?
       WHERE id = ?
     `;
-    console.log(sql);
+
     db.query(sql, [name, userId], (err, result: OkPacket) => {
       if (err) {
         return res.status(500).json(err);
@@ -138,6 +139,37 @@ app.put(
       }
 
       res.status(200).json({ message: "User updated successfully" });
+    });
+  },
+);
+
+app.put(
+  "/api/work-entries/:id",
+  (req: Request<{ id: string }, {}, WorkEntry>, res: Response) => {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    const workEntryId = parseInt(id, 10);
+    if (isNaN(workEntryId)) {
+      return res.status(400).json({ message: "Invalid work entry ID" });
+    }
+
+    const sql = `
+      UPDATE work_entries
+      SET action = ?
+      WHERE id = ?
+    `;
+
+    db.query(sql, [action, workEntryId], (err, result: OkPacket) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Work entry not found" });
+      }
+
+      res.status(200).json({ message: "Work entry updated successfully" });
     });
   },
 );

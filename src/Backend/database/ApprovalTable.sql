@@ -17,3 +17,6 @@ CREATE TABLE approvals
   (supervisor_id) REFERENCES users
   (id)
 );
+
+ALTER TABLE work_entries
+ADD COLUMN action ENUM('approved', 'rejected') NULL;
